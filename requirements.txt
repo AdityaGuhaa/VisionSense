@@ -1,0 +1,16 @@
+opencv-python
+numpy
+ultralytics
+pillow
+tqdm
+transformers
+accelerate
+sentencepiece
+torch
+torchvision
+torchaudio
+pyyaml
+rich
+
+supervision
+deep-sort-realtime
