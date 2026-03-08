@@ -1,5 +1,9 @@
 # VisionSense
 
+<img width="1920" height="1039" alt="visionsense" src="https://github.com/user-attachments/assets/f8e2d76b-59e2-4574-9374-089cf2efe710" />
+
+---
+
 **VisionSense** is a real‑time multimodal perception system that combines **computer vision** and **vision‑language models (VLMs)** to transform raw visual input into meaningful natural‑language scene understanding.
 
 The project integrates **YOLOv8 object detection** with a **Vision‑Language Model (Qwen2.5‑VL running via llama.cpp)** to analyze live webcam frames and generate human‑readable descriptions of the scene.
@@ -8,7 +12,7 @@ Instead of only detecting objects, VisionSense aims to move toward **true scene 
 
 ---
 
-# 🚀 Features
+# Features
 
 ### Real‑Time Scene Perception
 
