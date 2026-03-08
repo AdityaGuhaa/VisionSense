@@ -30,7 +30,7 @@ while True:
     frame = draw_detections(frame, detections)
 
     if frame_count % VLM_INTERVAL == 0:
-        scene_text = vlm.describe_scene(labels)
+        scene_text = vlm.describe_scene(frame)
 
     fps = fps_counter.update()
 
