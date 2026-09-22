@@ -4,6 +4,6 @@ FRAME_HEIGHT = 720
 
 YOLO_MODEL = "yolov8n.pt"
 
-VLM_INTERVAL = 60  # run VLM every 20 frames
+VLM_INTERVAL = 15  # run VLM more frequently (every ~0.5s)
 
 WINDOW_NAME = "VisionSense"

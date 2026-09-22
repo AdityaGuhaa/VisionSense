@@ -53,12 +53,12 @@ def main():
         # Extract labels
         labels = [d["label"] for d in detections]
 
-        # Draw detection boxes
-        frame = draw_detections(frame, detections)
-
-        # Run VLM every N frames
+        # Run VLM every N frames on the CLEAN frame
         if frame_count % VLM_INTERVAL == 0:
             scene_text = vlm.describe_scene(frame, labels)
+
+        # Draw detection boxes AFTER passing to VLM so it doesn't see the boxes
+        frame = draw_detections(frame, detections)
 
         # Update FPS
         fps = fps_counter.update()
