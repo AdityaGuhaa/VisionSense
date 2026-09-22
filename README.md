@@ -78,17 +78,22 @@ The system is structured as a modular pipeline.
 ```
 VisionSense
 │
-├── main.py
+├── main.py                     # Main application loop
+├── config.py                   # Centralized configuration (camera, intervals, thresholds)
 │
 ├── camera/
-│   └── camera_stream.py        # Handles webcam capture
+│   └── camera_stream.py        # Handles webcam capture & frame streaming
 │
 ├── models/
-│   ├── detector.py             # YOLOv8 detection wrapper
-│   └── vlm.py                  # Vision‑Language model interface
+│   ├── detector.py             # YOLOv8 object detection wrapper
+│   └── vlm.py                  # Vision‑Language model interface (spawns persistent llama-server)
+│
+├── prompts/
+│   └── scene_prompt.txt        # Prompts used for multimodal reasoning
 │
 ├── utils/
-│   └── drawing.py              # Bounding box and visualization utilities
+│   ├── drawing.py              # Bounding box and text visualization utilities
+│   └── fps.py                  # Real-time FPS calculation & display
 │
 └── requirements.txt
 ```
@@ -98,22 +103,26 @@ VisionSense
 **camera_stream.py**
 Handles real‑time frame capture from the webcam.
 
+**config.py**
+Centralized settings for camera index, resolution, frame intervals, and UI window parameters.
+
 **detector.py**
 Runs YOLOv8 inference and extracts:
-
 * object labels
 * bounding boxes
 * detection confidence
 
 **vlm.py**
-Interfaces with the **Vision‑Language Model running via llama.cpp** to generate scene descriptions.
+Interfaces with the **Vision‑Language Model** via a background `llama-server` process to achieve low-latency scene descriptions without reloading model weights on each frame.
 
 **drawing.py**
 Responsible for visualization such as:
-
 * bounding boxes
 * labels
 * annotations
+
+**fps.py**
+Tracks and displays real-time frame rates.
 
 ---
 
@@ -122,8 +131,8 @@ Responsible for visualization such as:
 ## Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/visionsense.git
-cd visionsense
+git clone https://github.com/AdityaGuhaa/VisionSense.git
+cd VisionSense
 ```
 
 ## Create a Virtual Environment
@@ -131,7 +140,7 @@ cd visionsense
 ```bash
 python -m venv venv
 source venv/bin/activate      # Linux / Mac
-venv\\Scripts\\activate       # Windows
+venv\Scripts\activate       # Windows
 ```
 
 ## Install Dependencies
@@ -152,26 +161,30 @@ Typical dependencies include:
 
 # Model Setup
 
-### YOLOv8
+### 1. YOLOv8
+The base model file (`yolov8n.pt`) is downloaded automatically by Ultralytics or included directly in the root directory.
 
-Download or load a YOLOv8 model using Ultralytics.
+### 2. Vision‑Language Model (Qwen2.5‑VL)
 
-Example:
+VisionSense uses **Qwen2.5‑VL‑3B‑Instruct** in GGUF format with `llama-server`.
 
-```python
-from ultralytics import YOLO
-model = YOLO("yolov8n.pt")
-```
-
-### Vision‑Language Model
-
-VisionSense uses a **Qwen2.5‑VL model running through llama.cpp**.
-
-Steps:
-
-1. Install and build **llama.cpp**
-2. Download the **Qwen2.5‑VL GGUF model**
-3. Configure the model path inside `vlm.py`
+1. **Install and build `llama.cpp`** with CUDA support:
+   ```bash
+   git clone https://github.com/ggml-org/llama.cpp.git
+   cd llama.cpp
+   cmake -B build -DGGML_CUDA=ON
+   cmake --build build --config Release -j
+   ```
+2. **Download Model & Multimodal Projector (`mmproj`)**:
+   Create the directory `models/qwen_vl/` inside VisionSense and download the required weights:
+   ```bash
+   mkdir -p models/qwen_vl
+   cd models/qwen_vl
+   wget https://huggingface.co/ggml-org/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf
+   wget https://huggingface.co/ggml-org/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/mmproj-Qwen2.5-VL-3B-Instruct-f16.gguf
+   ```
+3. **Configure Paths**:
+   Ensure `self.cli_path` in `models/vlm.py` points to your built `llama-server` binary (e.g. `/path/to/llama.cpp/build/bin/llama-server`).
 
 ---
 
@@ -230,14 +243,12 @@ Useful for experimenting with **vision + language architectures**.
 
 # Roadmap
 
-Future improvements planned for VisionSense:
-
-* Temporal scene understanding (multi‑frame reasoning)
-* Relationship detection between objects
-* Improved prompt engineering
-* Faster inference pipelines
-* Edge device deployment
-* Robotics integration
+* [x] Faster inference pipeline (persistent background `llama-server` streaming)
+* [ ] Temporal scene understanding (multi‑frame reasoning)
+* [ ] Relationship detection between objects
+* [ ] Improved prompt engineering & context pruning
+* [ ] Edge device deployment
+* [ ] Robotics integration
 
 ---
 
